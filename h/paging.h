@@ -44,10 +44,12 @@ typedef struct{
 
 typedef struct{
   int bs_status;			/* MAPPED or UNMAPPED		*/
-  int bs_pid;				/* process id using this slot   */
-  int bs_vpno;				/* starting virtual page number */
+  int bs_pid[NPROC];				/* process id using this slot   */
+  int bs_vpno[NPROC];				/* starting virtual page number */
   int bs_npages;			/* number of pages in the store */
   int bs_sem;				/* semaphore mechanism ?	*/
+  int bs_refCount;
+  int bs_isheap;
 } bs_map_t;
 
 typedef struct{
@@ -92,9 +94,10 @@ SYSCALL write_bs(char *, bsd_t, int);
 #define FR_DIR		2
 
 #define FIFO		3
+#define LRU		4//LRU page replacement polic is 4.
 #define GCM		4
 
-#define MAX_ID          9              /* You get 10 mappings, 0 - 9 */
+#define MAX_ID          15              /* Number of Backing Stores*/
 
-#define BACKING_STORE_BASE	0x00600000
-#define BACKING_STORE_UNIT_SIZE 0x00100000
+#define BACKING_STORE_BASE	0x00800000 //Backing Store start address is 0x00800000 and not 0x00600000
+#define BACKING_STORE_UNIT_SIZE 0x00080000 //Backing Store size is 0x00080000 and not 0x00100000

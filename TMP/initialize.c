@@ -48,7 +48,7 @@ int	console_dev;		/* the console device			*/
 
 /*  added for the demand paging */
 int page_replace_policy = FIFO;
-
+bs_map_t bsm_tab[16];//Number Of Backing stores: 16
 /************************************************************************/
 /***				NOTE:				      ***/
 /***								      ***/
@@ -77,6 +77,7 @@ nulluser()				/* babysit CPU when no one is home */
 
 	kprintf("system running up!\n");
 	sysinit();
+
 
 	enable();		/* enable interrupts */
 
@@ -166,8 +167,13 @@ sysinit()
 	}
 	
 
-	for (i=0 ; i<NPROC ; i++)	/* initialize process table */
+	for (i=0 ; i<NPROC ; i++){	/* initialize process table */
 		proctab[i].pstate = PRFREE;
+		proctab[i].store = -1;
+		proctab[i].vhpno = -1;
+		proctab[i].vhpnpages = -1;
+		proctab[i].vmemlist = NULL;
+	}
 
 
 #ifdef	MEMMARK
@@ -202,14 +208,79 @@ sysinit()
 	pptr->pargs = 0;
 	pptr->pprio = 0;
 	currpid = NULLPROC;
+	
+	
+	
+	////
+	int i,j;
+	//Global Page Table Init
+	pt_t *FourGlobalPageTable =(pt_t*) (FRAME0 * NBPG);
+	for(i=0;i<4;i++){
+		frm_tab[i].fr_status = FRM_MAPPED;
+		frm_tab[i].fr_pid = NULLPROC;
+		frm_tab[i].fr_type = FR_TBL;
+	}
+	for(i=0;i<1024*4;i++){
+// FourGlobalPageTable[i] = 0; FourGlobalPageTable[i]((i)<< 12)|| (1 << 1) || ( 1 << 0); 
+		
+		//FourGlobalPageTable[i] = 0;
+		FourGlobalPageTable[i].pt_pres = 1;
+		FourGlobalPageTable[i].pt_write = 1;
+		FourGlobalPageTable[i].pt_base = i;
+	}
 
+	//NULLPROC page directory HardCoded
+	i = FRAME0 + 4;// 'i' -> Used to point to 1028 Frame
+	pptr->pdbr = (i)*NBPG;
+	frm_tab[i].fr_status = FRM_MAPPED;
+	frm_tab[i].fr_pid = NULLPROC;
+	frm_tab[i].fr_type = FR_DIR;
+	pd_t *nullProcPgDir =(pd_t*) (i * NBPG);
+
+
+	for(i=0;i<4;i++){
+// nullProcPgDir[i]=0; nullProcPgDir[i] = ((FRAME0 + i)<<12) || (1<<1) || (1<<0);
+		//nullProcPgDir[i] = 0;
+		nullProcPgDir[i].pd_pres = 1;
+		nullProcPgDir[i].pd_write = 1;
+		nullProcPgDir[i].pd_base = FRAME0 + i;
+		
+	}
+	/*for(i=4;i<1024;i++){
+		nullProcPgDir[i] = 0;
+	}*/
+
+
+
+	InitFramesTable&Queue
+	
+	//InitBSTable
+	for(i=0;i<16;i++){//Number Of Backing stores: 16
+		bsm_tab[i].bs_status = BSM_UNMAPPED;
+		bsm_tab[i].bs_npages = 0;
+		bsm_tab[i].bs_isheap = 0;
+		//Multiple Process Link to same Backing Store
+		for(j=0;j<NPROC;j++){
+			bsm_tab[i].bs_pid[NPROC]=-1;
+			bsm_tab[i].bs_vpno[NPROC]=-1;
+		}
+		//Number of Process mapping this Backing store
+		bsm_tab[i].bs_refCount = 0;
+		//Frames mapping to this backing store
+		bsm_tab[i].frames = NULL;
+	}	
+	
+	
 	for (i=0 ; i<NSEM ; i++) {	/* initialize semaphores */
 		(sptr = &semaph[i])->sstate = SFREE;
 		sptr->sqtail = 1 + (sptr->sqhead = newqueue());
 	}
 
 	rdytail = 1 + (rdyhead=newqueue());/* initialize ready list */
-
+////
+	write_cr3(pptr->pdbr);
+	enable_paging();
+	set_evec(14,(u_long)pfintr);//Install Page Fault Interrupt Handler
 
 	return(OK);
 }
