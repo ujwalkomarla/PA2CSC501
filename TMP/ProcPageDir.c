@@ -9,14 +9,14 @@ SYSCALL ProcPageDir(int pid)
 	int *freeFrm,i;
 	
 	
-	GetFreeFrame(&freeFrm);//GetFreeFrame returns the free frame number in range 0 to NFRAMES
+	get_frm(&freeFrm);//GetFreeFrame returns the free frame number in range 0 to NFRAMES
 	i = *freeFrm;
 	proctab[pid].pdbr = (i+FRAME0) * NBPG;
 
 	frm_tab[i].fr_status = FRM_MAPPED;
-	frm_tab[i].fr_pid = pid;
+	frm_tab[i].fr_pid[0] = pid;
 	frm_tab[i].fr_type = FR_DIR;
-	
+	frm_tab[i].fr_refcnt = 1;
 	pd_t *pgDir = (pd_t*)((i + FRAME0) * NBPG);
 	for(i=0;i<4;i++)
 	{

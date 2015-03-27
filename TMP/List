@@ -1,14 +1,18 @@
 Change
 	ToDo
-	5.frame.c
-	8.initialize.c : Initializing frame structure and stuff. Is that asm code needed?
-	10.paging.h : Additional structures and modifications to current ones.
+	5.frame.c : get_frm, free_frm
 	11.pfint.c
 	21.xm.c : xmunmap
 
+	Little
+	8.initialize.c
+	10.paging.h : Additional structures and modifications to current ones.
+
+
+
 	Done
 	1.bsm.c : Removed
-	3.create_pgdir.c : Function name(ProcPageDir), Change getfreeframe and shared memory as individual frames
+	3.create_pgdir.c : Function name(ProcPageDir)
 	6.get_bs.c : Modified to single array based BS structure.
 	7.init_bs.c : Moved to initialize.c(Probably needs more reworking)
 	9.initpage.c : Moved to initialize.c(Zero out all other flag bits)

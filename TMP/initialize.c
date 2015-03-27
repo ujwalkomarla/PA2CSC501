@@ -49,6 +49,7 @@ int	console_dev;		/* the console device			*/
 /*  added for the demand paging */
 int page_replace_policy = FIFO;
 bs_map_t bsm_tab[16];//Number Of Backing stores: 16
+fr_map_t frm_tab[NFRAMES];
 /************************************************************************/
 /***				NOTE:				      ***/
 /***								      ***/
@@ -212,13 +213,16 @@ sysinit()
 	
 	
 	////
+
+	init_frm();
 	int i,j;
 	//Global Page Table Init
 	pt_t *FourGlobalPageTable =(pt_t*) (FRAME0 * NBPG);
 	for(i=0;i<4;i++){
 		frm_tab[i].fr_status = FRM_MAPPED;
-		frm_tab[i].fr_pid = NULLPROC;
+		frm_tab[i].fr_pid[0] = NULLPROC;
 		frm_tab[i].fr_type = FR_TBL;
+		frm_tab[i].fr_refcnt = 1;
 	}
 	for(i=0;i<1024*4;i++){
 // FourGlobalPageTable[i] = 0; FourGlobalPageTable[i]((i)<< 12)|| (1 << 1) || ( 1 << 0); 
@@ -230,11 +234,13 @@ sysinit()
 	}
 
 	//NULLPROC page directory HardCoded
+	i = 4;//4th frame
+	frm_tab[i].fr_status = FRM_MAPPED;
+	frm_tab[i].fr_pid[0] = NULLPROC;
+	frm_tab[i].fr_type = FR_DIR;
+	frm_tab[i].fr_refcnt = 1;
 	i = FRAME0 + 4;// 'i' -> Used to point to 1028 Frame
 	pptr->pdbr = (i)*NBPG;
-	frm_tab[i].fr_status = FRM_MAPPED;
-	frm_tab[i].fr_pid = NULLPROC;
-	frm_tab[i].fr_type = FR_DIR;
 	pd_t *nullProcPgDir =(pd_t*) (i * NBPG);
 
 
@@ -252,7 +258,7 @@ sysinit()
 
 
 
-	InitFramesTable&Queue
+	
 	
 	//InitBSTable
 	for(i=0;i<16;i++){//Number Of Backing stores: 16

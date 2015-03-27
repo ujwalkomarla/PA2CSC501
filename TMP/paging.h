@@ -54,8 +54,8 @@ typedef struct{
 
 typedef struct{
   int fr_status;			/* MAPPED or UNMAPPED		*/
-  int fr_pid;				/* process id using this frame  */
-  int fr_vpno;				/* corresponding virtual page no*/
+  int fr_pid[NPROC];				/* process id using this frame  */
+  int fr_vpno[NPROC];				/* corresponding virtual page no*/
   int fr_refcnt;			/* reference count		*/
   int fr_type;				/* FR_DIR, FR_TBL, FR_PAGE	*/
   int fr_dirty;
@@ -63,11 +63,25 @@ typedef struct{
   unsigned long int fr_loadtime;	/* when the page is loaded 	*/
 }fr_map_t;
 
+
+
+typedef struct _frm_list{
+	struct _frm_list *next;
+	int frameno;
+};
+typedef struct _frm_list free_frm_list;
+typedef struct _frm_list used_frm_list;
+free_frm_list *freehead;
+used_frm_list *usedhead;
+
+
+
 extern bs_map_t bsm_tab[];
 extern fr_map_t frm_tab[];
 /* Prototypes for required API calls */
 SYSCALL xmmap(int, bsd_t, int);
 SYSCALL xunmap(int);
+
 
 /* given calls for dealing with backing store */
 
