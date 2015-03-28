@@ -23,7 +23,7 @@ extern	int	main();	/* address of user's main prog	*/
 extern	int	start();
 
 LOCAL		sysinit();
-
+int page_replace_policy;
 /* Declarations of major kernel variables */
 struct	pentry	proctab[NPROC]; /* process table			*/
 int	nextproc;		/* next process slot to use in create	*/
@@ -116,6 +116,9 @@ nulluser()				/* babysit CPU when no one is home */
 
 	/* create a process to execute the user's main program */
 	userpid = create(main,INITSTK,INITPRIO,INITNAME,INITARGS);
+#ifdef DEBUGuser
+//	kprintf("HereExitCreate\n");
+#endif
 	resume(userpid);
 
 	while (TRUE)
@@ -174,6 +177,8 @@ sysinit()
 		proctab[i].vhpno = -1;
 		proctab[i].vhpnpages = -1;
 		proctab[i].vmemlist = NULL;
+		proctab[i].pBSlist = NULL;
+
 	}
 
 
@@ -215,14 +220,14 @@ sysinit()
 	////
 
 	init_frm();
-	int i,j;
+	//int i,j;
 	//Global Page Table Init
 	pt_t *FourGlobalPageTable =(pt_t*) (FRAME0 * NBPG);
 	for(i=0;i<4;i++){
 		frm_tab[i].fr_status = FRM_MAPPED;
-		frm_tab[i].fr_pid[0] = NULLPROC;
+		frm_tab[i].fr_pid = NULLPROC;
 		frm_tab[i].fr_type = FR_TBL;
-		frm_tab[i].fr_refcnt = 1;
+		//frm_tab[i].fr_refcnt = 1;
 	}
 	for(i=0;i<1024*4;i++){
 // FourGlobalPageTable[i] = 0; FourGlobalPageTable[i]((i)<< 12)|| (1 << 1) || ( 1 << 0); 
@@ -236,9 +241,9 @@ sysinit()
 	//NULLPROC page directory HardCoded
 	i = 4;//4th frame
 	frm_tab[i].fr_status = FRM_MAPPED;
-	frm_tab[i].fr_pid[0] = NULLPROC;
+	frm_tab[i].fr_pid = NULLPROC;
 	frm_tab[i].fr_type = FR_DIR;
-	frm_tab[i].fr_refcnt = 1;
+	//frm_tab[i].fr_refcnt = 1;
 	i = FRAME0 + 4;// 'i' -> Used to point to 1028 Frame
 	pptr->pdbr = (i)*NBPG;
 	pd_t *nullProcPgDir =(pd_t*) (i * NBPG);
@@ -273,7 +278,7 @@ sysinit()
 		//Number of Process mapping this Backing store
 		bsm_tab[i].bs_refCount = 0;
 		//Frames mapping to this backing store
-		bsm_tab[i].frames = NULL;
+		//bsm_tab[i].frames = NULL;
 	}	
 	
 	

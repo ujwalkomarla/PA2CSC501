@@ -3,7 +3,7 @@
 pferrcode:		.long 0
 			.globl  pfintr,pferrcode
 pfintr:
-	popl err  		   /* store the error code */
+	popl pferrcode  		   /* store the error code */
 	pushfl			   /* store flag reg		*/
     cli                /* interrupt disabled 	*/
 	pushal             /* save all general regs     */

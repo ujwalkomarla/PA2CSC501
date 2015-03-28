@@ -13,16 +13,16 @@ SYSCALL release_bs(bsd_t bs_id) {
 		bsm_tab[bs_id].bs_status = BSM_UNMAPPED;
 		bsm_tab[bs_id].bs_npages = 0;
 	}
-	bsm_tab[bs_id].pid[currpid] = -1;
+	bsm_tab[bs_id].bs_pid[currpid] = -1;
 //	proctab[currpid].store = -1;//shouldn't I change to pBSlist
-	ProcBSlist *ins = &proctab[currpid].pBSlist;
-	if(ins==NULL) return SYSERR;
-	while(ins->store!=bs_id){
-		ins = ins->next;
+	ProcBSlist **ins = &proctab[currpid].pBSlist;
+	if(*ins==NULL) return SYSERR;
+	while((*ins)->store!=bs_id){
+		(*ins) = &(*ins)->next;
 	}
-	ProcBSlist *t = ins;
-	ins = ins->next;
-	freemem(t);
+	ProcBSlist *t = *ins;
+	*ins = (*ins)->next;
+	freemem(t,sizeof(ProcBSlist));
    return OK;
 
 }

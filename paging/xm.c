@@ -13,16 +13,27 @@
 SYSCALL xmmap(int virtpage, bsd_t source, int npages)
 {
   /* sanity check ! */
-
-  if ( (virtpage < 4096) || ( source < 0 ) || ( source > MAX_ID) ||(npages < 1) || ( npages >200)){
-	kprintf("xmmap call error: parameter error! \n");
+  STATWORD ps;	
+  disable(ps);
+  if ( (virtpage < 4096) || ( source < 0 ) || ( source > MAX_ID) ||(npages < 1) || ( npages > 100)){
+ 	restore(ps);
 	return SYSERR;
   }
+	if(bsm_tab[source].bs_pid[currpid] != 1) return SYSERR;//Backing store not mapped to process
+	bsm_tab[source].bs_vpno[currpid] = virtpage;
 
-  kprintf("xmmap - to be implemented!\n");
-  return SYSERR;
+
+	ProcBSlist *ins = proctab[currpid].pBSlist;
+
+	while(ins!=NULL && ins->store!=source){
+		ins = ins->next;
+	}
+	if(ins==NULL) return SYSERR;//No Backing store mapped to process
+	ins->vhpnpages = bsm_tab[source].bs_npages;
+	ins->vhpno = virtpage;
+	  restore(ps);
+	  return OK;
 }
-
 
 
 /*-------------------------------------------------------------------------
@@ -31,13 +42,46 @@ SYSCALL xmmap(int virtpage, bsd_t source, int npages)
  */
 SYSCALL xmunmap(int virtpage )
 {
+	int i,tmp,j,k;
+	//int npages = proctab[currpid].vhpnpages;
+	//free_frm_list *freefrm,*freefrm1;
+    //used_frm_list *usedfrm,*prevfrm,*usedfrm1;
+	//int c=0;
+	int bs_id;
+	int vhpno;
+	int tpg;
+	STATWORD ps;
+    disable(ps);	
   /* sanity check ! */
   if ( (virtpage < 4096) ){ 
+ 	restore(ps);
 	kprintf("xmummap call error: virtpage (%d) invalid! \n", virtpage);
 	return SYSERR;
   }
+	if(proctab[currpid].vhpno<virtpage && (proctab[currpid].vhpno+proctab[currpid].vhpnpages) > virtpage){//Release heap
+		bs_id = proctab[currpid].store;
+		vhpno = proctab[currpid].vhpno;
+		tpg = proctab[currpid].vhpnpages;
+	}else{//File
+		ProcBSlist *t = proctab[currpid].pBSlist;
+		while(t != NULL){
+			if(t->vhpno<virtpage && (t->vhpno + t->vhpnpages)>virtpage){
+				bs_id = t->store;
+				vhpno  = t->vhpno;
+				tpg = t->vhpnpages;
+				break;
+			}
+			t = t->next;
+		}
 
-  kprintf("To be implemented!");
-  return SYSERR;
+		if(t == NULL){restore(ps); return SYSERR;}
+	}
+	for(i=0;i<NFRAMES;i++){
+		if(frm_tab[i].fr_pid==currpid){
+			if(vhpno<virtpage&&vhpno+tpg>virtpage){
+free_frm(i);
 }
-
+		}
+	}
+	//remove entry from page table(use free_frm)
+}

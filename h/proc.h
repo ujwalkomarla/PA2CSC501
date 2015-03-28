@@ -1,5 +1,5 @@
 /* proc.h - isbadpid */
-
+#define DEBUGuser
 #ifndef _PROC_H_
 #define _PROC_H_
 
@@ -44,6 +44,14 @@
 #define	isbadpid(x)	(x<=0 || x>=NPROC)
 
 /* process table entry */
+typedef struct _lookupBS4Vaddr{
+			int     store;                  /* backing store */
+		    int     vhpno;                  /* starting pageno */
+		    int     vhpnpages; 				/* number of pages */
+			//int isHeap;
+			struct  _lookupBS4Vaddr *next;
+}ProcBSlist;
+
 
 struct	pentry	{
 	char	pstate;			/* process state: PRCURR, etc.	*/
@@ -77,6 +85,8 @@ struct	pentry	{
         int     vhpno;                  /* starting pageno for vheap    */
         int     vhpnpages;              /* vheap size                   */
         struct mblock *vmemlist;        /* vheap list              	*/
+		ProcBSlist *pBSlist;
+
 };
 
 

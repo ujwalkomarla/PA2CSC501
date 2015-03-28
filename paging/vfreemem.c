@@ -17,8 +17,7 @@ SYSCALL	vfreemem(block, size)
     struct  mblock  *p, *q;
     unsigned top;
 
-    if (size==0) || (unsigned)block>(unsigned)((4096+proctab[currpid].npages)*NBPG)
-       || ((unsigned)block)<((unsigned) (4096*NBPG))
+    if ((size==0) || (unsigned)block>(unsigned)((4096+proctab[currpid].vhpnpages)*4096) || ((unsigned)block)<((unsigned) (4096*4096)))
         return(SYSERR);
     size = (unsigned)roundmb(size);
     disable(ps);

@@ -9,7 +9,6 @@
 #include <io.h>
 #include <paging.h>
 
-LOCAL int newpid();
 
 /*-------------------------------------------------------------------------------
  *  vcreate  -  create a process to start running a procedure with Virtual Memory
@@ -66,7 +65,7 @@ SYSCALL vcreate(procaddr,ssize,hsize,priority,name,nargs,args)
 	proctab[pid].vmemlist->mnext = (struct mblock*)(4096*NBPG);
     proctab[pid].vmemlist->mlen = 0;
 	proctab[pid].vmemlist->mnext->mnext = NULL;
-	proctab[pid].vmemlist->mnext->mlen = (hsizes)*NBPG;
+	proctab[pid].vmemlist->mnext->mlen = (hsize)*NBPG;
 	
     
 

@@ -54,9 +54,9 @@ typedef struct{
 
 typedef struct{
   int fr_status;			/* MAPPED or UNMAPPED		*/
-  int fr_pid[NPROC];				/* process id using this frame  */
-  int fr_vpno[NPROC];				/* corresponding virtual page no*/
-  int fr_refcnt;			/* reference count		*/
+  int fr_pid;				/* process id using this frame  */
+  int fr_vpno;				/* corresponding virtual page no*/
+//  int fr_refcnt;			/* reference count		*/
   int fr_type;				/* FR_DIR, FR_TBL, FR_PAGE	*/
   int fr_dirty;
   void *cookie;				/* private data structure	*/
@@ -65,7 +65,7 @@ typedef struct{
 
 
 
-typedef struct _frm_list{
+struct _frm_list{
 	struct _frm_list *next;
 	int frameno;
 };
@@ -74,8 +74,7 @@ typedef struct _frm_list used_frm_list;
 free_frm_list *freehead;
 used_frm_list *usedhead;
 
-
-
+extern int page_replace_policy;
 extern bs_map_t bsm_tab[];
 extern fr_map_t frm_tab[];
 /* Prototypes for required API calls */
@@ -89,7 +88,7 @@ int get_bs(bsd_t, unsigned int);
 SYSCALL release_bs(bsd_t);
 SYSCALL read_bs(char *, bsd_t, int);
 SYSCALL write_bs(char *, bsd_t, int);
-
+ProcPageDir(int);
 #define NBPG		4096	/* number of bytes per page	*/
 #define FRAME0		1024	/* zero-th frame		*/
 

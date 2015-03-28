@@ -99,7 +99,13 @@ SYSCALL create(procaddr,ssize,priority,name,nargs,args)
 
 
 ////
+#ifdef DEBUGuser
+	//kprintf("HereBeforeProcPageDirCall\n");
+#endif
 	ProcPageDir(pid);
+#ifdef DEBUGuser
+	//kprintf("HereOutProcPageDirCall\n");
+#endif
 	restore(ps);
 
 	return(pid);

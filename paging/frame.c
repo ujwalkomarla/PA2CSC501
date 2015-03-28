@@ -14,29 +14,29 @@ SYSCALL init_frm()
 	for(i=0;i<NFRAMES;i++)
 	{
 		frm_tab[i].fr_status = FRM_UNMAPPED;
-		for(j=0;j<NPROC;j++)
-		{
-			frm_tab[i].fr_pid[j] = -1;
-			frm_tab[i].fr_vpno[j] = -1;
-		}
-		frm_tab[i].fr_refcnt = 0;
+		//for(j=0;j<NPROC;j++)
+		//{
+			frm_tab[i].fr_pid = -1;
+			frm_tab[i].fr_vpno = -1;
+		//}
+		//frm_tab[i].fr_refcnt = 0;
 		frm_tab[i].fr_type = -1;
 		frm_tab[i].fr_dirty = 0;
 		frm_tab[i].fr_loadtime = 0;
 	}
 //Initialize free list of frames
-	free_frm_List *tmp;
+	free_frm_list *tmp;
 	freehead = usedhead = NULL;
 	//iter = &freehead;
 	for(i=0;i<5;i++){
-		tmp = getmem(sizeof(freeFrmList));
+		tmp = getmem(sizeof(free_frm_list));
 		tmp->frameno = i;
 		tmp->next = usedhead;
 		usedhead = tmp;
 	}
 
 	for(i=5;i<NFRAMES;i++){
-		tmp = getmem(sizeof(freeFrmList));
+		tmp = getmem(sizeof(free_frm_list));
 		tmp->frameno = i;
 		tmp->next = freehead;
 		freehead = tmp;
@@ -53,7 +53,7 @@ SYSCALL get_frm(int* avail)
 {
 	if(page_replace_policy == FIFO){
 		if(freehead != NULL){ //In FIFO, check if free list is not empty. Then transfer a frame to used list
-			freefrm = freehead;
+			free_frm_list *freefrm = freehead;
 			freehead = freehead->next;
 			freefrm->next = NULL;
 		
@@ -107,8 +107,54 @@ SYSCALL get_frm(int* avail)
  */
 SYSCALL free_frm(int i)
 {
+	int procid,bs_id,offset,j;
+	int *pagedir,dirty = 0,vpg;
+	virt_addr_t addr;
+	pd_t *pd;
+	pt_t *pt;
+	//for(j=0;j<frm_tab[i].fr_refcnt;j++){ 
+		procid = frm_tab[i].fr_pid;
+		pagedir = (int*)proctab[procid].pdbr;
+		vpg = frm_tab[i].fr_vpno;
+		addr.pd_offset = (((vpg)*NBPG) >> 22);
+		addr.pt_offset = ((((vpg)*NBPG) >> 12) & 0x3FF);
+		addr.pg_offset = (((vpg)*NBPG) & 0xFFF);
+		pd = (pd_t*)(pagedir+addr.pd_offset);
+		pt = (pt_t*)((int*)(pd->pd_base)+addr.pt_offset);
+		
+		if(pt->pt_dirty == 1){
+			dirty = 1;
+			pt->pt_dirty = 0;
+		}
+		ProcBSlist *ins = &proctab[procid].pBSlist;
+		
+		while(ins != NULL){
+			if(ins->vhpno<vpg && (ins->vhpno+ins->vhpnpages) > vpg) break;
+			ins = ins->next;
+		}
+		if(ins==NULL) return SYSERR;//No Backing store mapped to process	
+		bs_id = ins->store;
+		//offset = (ins->vhpno+vhpnpages) - vpg;
+		offset = vpg - ins->vhpno;
+		
+		
+		
+		//Invalidate Entry in page table?
+		pt->pt_pres = 0;
+		
+		*(int*)(pt) = 0;
+		frm_tab[i].fr_pid = -1;
+		frm_tab[i].fr_vpno = -1;
+	/*}*/
+	
+	if(dirty)
+		write_bs(((i+FRAME0) * NBPG),bs_id,offset);
+	frm_tab[i].fr_status = FRM_UNMAPPED;
+	//frm_tab[i].fr_refcnt = 0;
+	frm_tab[i].fr_type = -1;
 
-  kprintf("To be implemented!\n");
+
+	
   return OK;
 }
 
