@@ -94,7 +94,7 @@ ProcPageDir(int);
 
 //default 3072 frames --> 1024+3072=4096=16M
 //#define NFRAMES 	3072	/* number of frames		*/
-#define NFRAMES 	8	/* number of frames		*/
+#define NFRAMES 	15	/* number of frames		*/
 
 #define BSM_UNMAPPED	0
 #define BSM_MAPPED	1

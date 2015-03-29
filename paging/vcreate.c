@@ -33,6 +33,9 @@ SYSCALL vcreate(procaddr,ssize,hsize,priority,name,nargs,args)
 	disable(ps);
 	int pid;	
 	pid = create(procaddr,ssize,priority,name,nargs,args);
+#ifdef DEBUGuser
+//kprintf("vcreate pid %d",pid);
+#endif
 	if(pid==SYSERR){
 		restore(ps);
 		return SYSERR;		
@@ -45,6 +48,7 @@ SYSCALL vcreate(procaddr,ssize,hsize,priority,name,nargs,args)
 			break;
 		}
 	}
+  
 	bsm_tab[i].bs_npages = hsize;
 	bsm_tab[i].bs_isheap = 1;
 	bsm_tab[i].bs_pid[pid] = 1;
@@ -61,13 +65,10 @@ SYSCALL vcreate(procaddr,ssize,hsize,priority,name,nargs,args)
 	proctab[pid].store = i;
 	proctab[pid].vhpno = 4096;
   	proctab[pid].vhpnpages = hsize;
-	proctab[pid].vmemlist = getmem(sizeof(struct mblock));
-	proctab[pid].vmemlist->mnext = (struct mblock*)(4096*NBPG);
-    proctab[pid].vmemlist->mlen = 0;
-	proctab[pid].vmemlist->mnext->mnext = NULL;
-	proctab[pid].vmemlist->mnext->mlen = (hsize)*NBPG;
+ 
 	
-    
+	
+
 
 	restore(ps);
 	return pid;

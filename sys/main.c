@@ -15,9 +15,9 @@ void proc1_test1(char *msg, int lck) {
   char *addr;
   int i;
 
-  get_bs(TEST1_BS, 200);
+  get_bs(TEST1_BS, 100);
 
-  if (xmmap(PROC1_VPNO, TEST1_BS, 200) == SYSERR) {
+  if (xmmap(PROC1_VPNO, TEST1_BS, 100) == SYSERR) {
     kprintf("xmmap call failed\n");
     sleep(3);
     return;
@@ -25,13 +25,19 @@ void proc1_test1(char *msg, int lck) {
 
   addr = (char*) PROC1_VADDR;
   for (i = 0; i < 26; i++) {
+#ifdef DEBUGuser
+//kprintf("Access : Address %x\t",addr + i * NBPG);
+#endif
     *(addr + i * NBPG) = 'A' + i;
+#ifdef DEBUGuser
+//kprintf("Value %d\n",*(addr + i * NBPG));
+#endif
   }
-
-  sleep(6);
+//kprintf("\n\n");
+  //sleep(6);
 
   for (i = 0; i < 26; i++) {
-    kprintf("0x%08x: %c\n", addr + i * NBPG, *(addr + i * NBPG));
+    kprintf("%x: %d\n", addr + i * NBPG, *(addr + i * NBPG));
   }
 
   xmunmap(PROC1_VPNO);
@@ -49,6 +55,7 @@ void proc1_test2(char *msg, int lck) {
 
   kprintf("heap variable: %d %d\n", *x, *(x + 1));
   vfreemem(x, 1024);
+sleep(3);
 }
 
 void proc1_test3(char *msg, int lck) {

@@ -33,6 +33,15 @@ int get_bs(bsd_t bs_id, unsigned int npages) {
 #ifdef DEBUGuser
 	kprintf("BS_MAP\n");
 #endif
+#ifdef DEBUGuser
+/*ProcBSlist *t = tVar;
+while(t!=NULL){
+kprintf("%x  Store :%d   VHPNO: %d NPAGES: %d->",t,t->store,t->vhpno,t->vhpnpages);
+t = t->next;
+}
+kprintf("\n");*/
+#endif
+
     return bsm_tab[bs_id].bs_npages;
 
 }

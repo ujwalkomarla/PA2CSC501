@@ -290,8 +290,9 @@ sysinit()
 	rdytail = 1 + (rdyhead=newqueue());/* initialize ready list */
 ////
 	write_cr3(pptr->pdbr);
-	enable_paging();
 	set_evec(14,(u_long)pfintr);//Install Page Fault Interrupt Handler
+	enable_paging();
+	
 
 	return(OK);
 }

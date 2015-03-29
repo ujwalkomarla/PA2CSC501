@@ -8,12 +8,14 @@ SYSCALL ProcPageDir(int pid)
 {
 	int *freeFrm,i;
 	
-	#ifdef DEBUGuser
-	//kprintf("HereProcPageDirIn\n");
+#ifdef DEBUGuser
+//kprintf("freeFrm address %x, Val %d\n",freeFrm,*freeFrm);
 #endif
-	get_frm(freeFrm);//GetFreeFrame returns the free frame number in range 0 to NFRAMES
-
-	i = *freeFrm;
+	get_frm(&freeFrm);//GetFreeFrame returns the free frame number in range 0 to NFRAMES
+#ifdef DEBUGuser
+kprintf("freeFrm  Val %d\n",freeFrm);
+#endif
+	i = freeFrm;
 	proctab[pid].pdbr = (i+FRAME0) * NBPG;
 
 	frm_tab[i].fr_status = FRM_MAPPED;

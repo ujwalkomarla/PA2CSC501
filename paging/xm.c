@@ -28,9 +28,17 @@ SYSCALL xmmap(int virtpage, bsd_t source, int npages)
 	while(ins!=NULL && ins->store!=source){
 		ins = ins->next;
 	}
-	if(ins==NULL) return SYSERR;//No Backing store mapped to process
+	if(ins==NULL) return SYSERR;// Backing store not mapped to process
 	ins->vhpnpages = bsm_tab[source].bs_npages;
 	ins->vhpno = virtpage;
+#ifdef DEBUGuser
+ProcBSlist *t = proctab[currpid].pBSlist;
+while(t!=NULL){
+kprintf("%x  Store :%d   VHPNO: %d NPAGES: %d->",t,t->store,t->vhpno,t->vhpnpages);
+t = t->next;
+}
+kprintf("\n");
+#endif
 	  restore(ps);
 	  return OK;
 }
