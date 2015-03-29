@@ -55,7 +55,7 @@ void proc1_test2(char *msg, int lck) {
 
   kprintf("heap variable: %d %d\n", *x, *(x + 1));
   vfreemem(x, 1024);
-sleep(3);
+sleep(10);
 }
 
 void proc1_test3(char *msg, int lck) {
@@ -92,7 +92,7 @@ int main() {
   kprintf("pid %d has private heap\n", pid1);
   //assert (pid1 != SYSERR);
   resume(pid1);
-  sleep(3);
+  sleep(10);
 
 
   kprintf("\n3: Frame test\n");

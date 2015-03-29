@@ -137,8 +137,92 @@ kprintf("avail swap frame Val %d\n",*avail);
 #endif
 			return OK;
 		}
-	}//LRU
+	}else{//LRU
+		if(freehead != NULL){ //In LRU, check if free list is not empty. Then transfer a frame to used list
+			free_frm_list *freefrm = freehead;
+			freehead = freehead->next;
+			freefrm->next = NULL;
+		
+			//Add freefrm to used list(usedhead) at the tail.
+			used_frm_list **t;
+			t = &usedhead;
+			while(*t != NULL){
+#ifdef DEBUGuser
+//kprintf("Frame %d, Type %d\n",(*t)->frameno,frm_tab[(*t)->frameno].fr_type);
+#endif
+				t = &(*t)->next;
 
+			}
+			*t = freefrm;
+#ifdef DEBUGuser
+//kprintf("Frame %d, Type %d\n",(*t)->frameno,frm_tab[(*t)->frameno].fr_type);
+#endif
+			//return the free frame number ranging from 0 to NFRAMES
+			*avail = freefrm->frameno;
+#ifdef DEBUGuser
+kprintf("avail free frame Val %d\n",*avail);
+#endif
+			return OK;
+		}else{ 
+			used_frm_list **t;
+			t = &usedhead;
+			pd_t *pd = read_cr3();
+			unsigned int minCount = -1;
+			used_frm_list **toSwap = NULL;
+			while(*t != NULL){
+				if(frm_tab[(*t)->frameno].fr_type==FR_PAGE){
+					pt_t * pt = (pt_t*)((pd[frm_tab[(*t->frameno)].fr_vpno>>10].pd_base) * NBPG);
+					if(pt[frm_tab[(*t)->frameno].fr_vpno & 0x3FF].pt_acc == 1){
+						frm_tab[(*t)->frameno].fr_loadtime++;
+						pt[frm_tab[(*t)->frameno].fr_vpno & 0x3FF].pt_acc = 0;
+					}
+					if(frm_tab[(*t)->frameno].fr_loadtime < minCount){
+						minCount = frm_tab[(*t)->frameno].fr_loadtime;
+						toSwap = t;
+					}else if(frm_tab[(*t)->frameno].fr_loadtime == minCount) {//Go with one with largest virtual page no
+						if(frm_tab[(*t)->frameno].fr_vpno > frm_tab[(*toSwap)->frameno)].fr_vpno){
+							toSwap = t;
+							//minCount = frm_tab[(*t)->frameno].fr_loadtime;
+						}
+					}
+				}
+				t = &(*t)->next;
+
+			}
+
+			//Removing the Node from used list(usedhead) and copy to swapfrm
+			if(*toSwap == NULL){
+			#ifdef DEBUGuser
+			kprintf("error");
+			#endif
+			return SYSERR;
+			}			used_frm_list *swapfrm = *toSwap;
+			if(*toSwap == usedhead) usedhead = usedhead->next;
+			else{			
+				*toSwap = (*toSwap)->next;
+			}
+
+			swapfrm->next = NULL;
+			#ifdef DEBUGuser
+			//kprintf("Frame %d, Type %d\n",(*t)->frameno,frm_tab[(*t)->frameno].fr_type);
+			#endif		
+			free_frm(swapfrm->frameno);
+
+			//Add swapfrm node to used list(usedhead) at the tail.
+			t = &usedhead;
+			while(*t != NULL)
+				t = &(*t)->next;
+			*t = swapfrm;
+
+			*avail = swapfrm->frameno;
+			#ifdef DEBUGuser
+			kprintf("avail swap frame Val %d\n",*avail);
+			#endif
+			return OK;
+			}
+		
+		}
+	}
   return OK;
 }
 

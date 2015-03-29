@@ -60,7 +60,7 @@ typedef struct{
   int fr_type;				/* FR_DIR, FR_TBL, FR_PAGE	*/
   int fr_dirty;
   void *cookie;				/* private data structure	*/
-  unsigned long int fr_loadtime;	/* when the page is loaded 	*/
+  int fr_loadtime;	/* when the page is loaded 	*/
 }fr_map_t;
 
 

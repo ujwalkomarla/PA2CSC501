@@ -8,7 +8,7 @@
 #include <io.h>
 #include <q.h>
 #include <stdio.h>
-
+#include<paging.h>
 /*------------------------------------------------------------------------
  * kill  --  kill a process and remove it from the system
  *------------------------------------------------------------------------
@@ -24,6 +24,9 @@ SYSCALL kill(int pid)
 		restore(ps);
 		return(SYSERR);
 	}
+#ifdef DEBUGuser
+kprintf("Kill myself\n");
+#endif
 	if (--numproc == 0)
 		xdone();
 
@@ -40,26 +43,17 @@ SYSCALL kill(int pid)
 	send(pptr->pnxtkin, pid);
 
 	freestk(pptr->pbase, pptr->pstklen);
-	switch (pptr->pstate) {
-
-	case PRCURR:	pptr->pstate = PRFREE;	/* suicide */
-			resched();
-
-	case PRWAIT:	semaph[pptr->psem].semcnt++;
-
-	case PRREADY:	dequeue(pid);
-			pptr->pstate = PRFREE;
-			break;
-
-	case PRSLEEP:
-	case PRTRECV:	unsleep(pid);
-						/* fall through	*/
-	default:	pptr->pstate = PRFREE;
-	}
+#ifdef DEBUGuser
+kprintf("Here one..");
+#endif
 	used_frm_list **t_frm;
 		t_frm = &usedhead;
 		while(*t_frm != NULL){
-			if(frm_tab[(*t_frm )->frameno].fr_pid = currpid){
+			if(frm_tab[(*t_frm )->frameno].fr_pid == currpid){
+#ifdef DEBUGuser
+kprintf("Frame %d, Type %d\n",(*t_frm )->frameno,frm_tab[(*t_frm )->frameno].fr_type);
+//kprintf("BS_ID %d, offset %d\n",bs_id,offset);
+#endif	
 				if(frm_tab[(*t_frm )->frameno].fr_type != FR_PAGE){
 					frm_tab[(*t_frm )->frameno].fr_status = FRM_UNMAPPED;
 					frm_tab[(*t_frm )->frameno].fr_vpno = -1;
@@ -77,6 +71,9 @@ SYSCALL kill(int pid)
 			}
 			t_frm = &(*t_frm)->next;
 		}
+#ifdef DEBUGuser
+kprintf("Here two.. ");
+#endif
 int i;
 for(i=0;i<16;i++){
 	if(bsm_tab[i].bs_status ==BSM_MAPPED && bsm_tab[i].bs_pid[currpid] == 1){
@@ -103,6 +100,24 @@ while(*ins!=NULL){
 	freemem(*ins,sizeof(ProcBSlist));
 	*ins = t;
 }
+
+
+	switch (pptr->pstate) {
+
+	case PRCURR:	pptr->pstate = PRFREE;	/* suicide */
+			resched();
+
+	case PRWAIT:	semaph[pptr->psem].semcnt++;
+
+	case PRREADY:	dequeue(pid);
+			pptr->pstate = PRFREE;
+			break;
+
+	case PRSLEEP:
+	case PRTRECV:	unsleep(pid);
+						/* fall through	*/
+	default:	pptr->pstate = PRFREE;
+	}
 	restore(ps);
 	return(OK);
 }

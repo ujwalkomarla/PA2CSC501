@@ -83,6 +83,7 @@ kprintf("\n");*/
 		frm_tab[avail].fr_pid = currpid;
 		frm_tab[avail].fr_vpno = addr/NBPG;
 	frm_tab[avail].fr_type = FR_PAGE;
+	frm_tab[avail].fr_loadtime = 1;
 	pt[tmp.pt_offset].pt_pres = 1;
 	pt[tmp.pt_offset].pt_write = 1;
 	pt[tmp.pt_offset].pt_base = ((avail)+FRAME0);
