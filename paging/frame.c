@@ -93,7 +93,7 @@ SYSCALL get_frm(int* avail)
 			//return the free frame number ranging from 0 to NFRAMES
 			*avail = freefrm->frameno;
 #ifdef DEBUGuser
-//kprintf("avail free address %x, Val %d\n",&avail,*avail);
+kprintf("avail free frame Val %d\n",*avail);
 #endif
 			return OK;
 		}else{ //If free list is empty, choose a frame from used list and free it and add it back to the end of the used list
@@ -133,7 +133,7 @@ return SYSERR;
 
 			*avail = swapfrm->frameno;
 #ifdef DEBUGuser
-//kprintf("avail swap frame Val %d\n",*avail);
+kprintf("avail swap frame Val %d\n",*avail);
 #endif
 			return OK;
 		}

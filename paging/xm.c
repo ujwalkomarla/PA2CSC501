@@ -75,7 +75,7 @@ SYSCALL xmunmap(int virtpage )
 			t_frm = &usedhead;
 			while(*t_frm !=NULL){
 				if(frm_tab[(*t_frm)->frameno].fr_pid  = currpid){
-					if(vhpno<=frm_tab[(*t_frm)->frameno].fr_vpno && vhpno+vhpnpages>frm_tab[(*t_frm)->frameno].fr_vpno){
+					if(vhpno<=frm_tab[(*t_frm)->frameno].fr_vpno && vhpno+tpg>frm_tab[(*t_frm)->frameno].fr_vpno){
 
 						free_frm((*t_frm)->frameno);
 						free_frm_list* t1_frm = *t_frm ;
@@ -102,7 +102,7 @@ SYSCALL xmunmap(int virtpage )
 					t_frm = &usedhead;
 					while(*t_frm !=NULL){
 						if(frm_tab[(*t_frm)->frameno].fr_pid  = currpid){
-							if(vhpno<=frm_tab[(*t_frm)->frameno].fr_vpno && vhpno+vhpnpages>frm_tab[(*t_frm)->frameno].fr_vpno){
+							if(vhpno<=frm_tab[(*t_frm)->frameno].fr_vpno && vhpno+tpg>frm_tab[(*t_frm)->frameno].fr_vpno){
 
 								free_frm((*t_frm)->frameno);
 								free_frm_list* t1_frm = *t_frm ;
