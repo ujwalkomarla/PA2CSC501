@@ -1,5 +1,5 @@
 /* proc.h - isbadpid */
-#define DEBUGuser1
+//#define DEBUGuser1
 #ifndef _PROC_H_
 #define _PROC_H_
 
