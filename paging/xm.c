@@ -105,6 +105,7 @@ SYSCALL xmunmap(int virtpage )
 							if(vhpno<=frm_tab[(*t_frm)->frameno].fr_vpno && vhpno+tpg>frm_tab[(*t_frm)->frameno].fr_vpno){
 
 								free_frm((*t_frm)->frameno);
+
 								free_frm_list* t1_frm = *t_frm ;
 								*t_frm  = (*t_frm )->next;
 								t1_frm->next = freehead;
@@ -124,12 +125,5 @@ SYSCALL xmunmap(int virtpage )
 
 		if(t == NULL){restore(ps); return SYSERR;}
 	}
-	/*for(i=0;i<NFRAMES;i++){
-		if(frm_tab[i].fr_pid==currpid){
-			if(vhpno<virtpage&&vhpno+tpg>virtpage){
-			free_frm(i);
-			}
-		}
-	}*/
 
 }

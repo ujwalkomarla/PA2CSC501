@@ -24,6 +24,7 @@ extern	int	start();
 
 LOCAL		sysinit();
 int page_replace_policy;
+int gLoadtime;
 /* Declarations of major kernel variables */
 struct	pentry	proctab[NPROC]; /* process table			*/
 int	nextproc;		/* next process slot to use in create	*/

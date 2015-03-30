@@ -73,7 +73,7 @@ typedef struct _frm_list free_frm_list;
 typedef struct _frm_list used_frm_list;
 free_frm_list *freehead;
 used_frm_list *usedhead;
-
+extern int gLoadtime;
 extern int page_replace_policy;
 extern bs_map_t bsm_tab[];
 extern fr_map_t frm_tab[];

@@ -54,7 +54,8 @@ t = t->next;
 }else {kprintf("Error\n");sleep(1);}
 kprintf("\n");*/
 #endif
-		if(t == NULL){restore(ps); return SYSERR;}
+		if(t == NULL){//kprintf("kill");
+restore(ps); kill(currpid); return SYSERR;}
 	}
 
 	if(pd[tmp.pd_offset].pd_pres == 0){
@@ -83,7 +84,7 @@ kprintf("\n");*/
 		frm_tab[avail].fr_pid = currpid;
 		frm_tab[avail].fr_vpno = addr/NBPG;
 	frm_tab[avail].fr_type = FR_PAGE;
-	frm_tab[avail].fr_loadtime = 1;
+	frm_tab[avail].fr_loadtime = ++gLoadtime;
 	pt[tmp.pt_offset].pt_pres = 1;
 	pt[tmp.pt_offset].pt_write = 1;
 	pt[tmp.pt_offset].pt_base = ((avail)+FRAME0);

@@ -25,19 +25,13 @@ void proc1_test1(char *msg, int lck) {
 
   addr = (char*) PROC1_VADDR;
   for (i = 0; i < 26; i++) {
-#ifdef DEBUGuser
-//kprintf("Access : Address %x\t",addr + i * NBPG);
-#endif
     *(addr + i * NBPG) = 'A' + i;
-#ifdef DEBUGuser
-//kprintf("Value %d\n",*(addr + i * NBPG));
-#endif
   }
-//kprintf("\n\n");
-  //sleep(6);
+
+  sleep(6);
 
   for (i = 0; i < 26; i++) {
-    kprintf("%x: %d\n", addr + i * NBPG, *(addr + i * NBPG));
+    kprintf("0x%08x: %c\n", addr + i * NBPG, *(addr + i * NBPG));
   }
 
   xmunmap(PROC1_VPNO);
@@ -55,7 +49,6 @@ void proc1_test2(char *msg, int lck) {
 
   kprintf("heap variable: %d %d\n", *x, *(x + 1));
   vfreemem(x, 1024);
-sleep(10);
 }
 
 void proc1_test3(char *msg, int lck) {
@@ -79,7 +72,7 @@ void proc1_test3(char *msg, int lck) {
 int main() {
   int pid1;
   int pid2;
-
+//srpolicy(LRU);
   kprintf("\n1: shared memory\n");
   pid1 = create(proc1_test1, 2000, 20, "proc1_test1", 0, NULL);
   resume(pid1);
@@ -92,13 +85,13 @@ int main() {
   kprintf("pid %d has private heap\n", pid1);
   //assert (pid1 != SYSERR);
   resume(pid1);
-  sleep(10);
+  sleep(15);
 
 
-  kprintf("\n3: Frame test\n");
+  kprintf("\n3: Frame test\n");sleep(3);
   pid1 = create(proc1_test3, 2000, 20, "proc1_test3", 0, NULL);
   resume(pid1);
-  sleep(3);
+  
 
 }
 
